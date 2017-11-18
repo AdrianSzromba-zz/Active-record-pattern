@@ -28,6 +28,7 @@ CREATE TABLE solution (
 	description TEXT,
 	excercise_id INT,
 	users_id BIGINT,
+	PRIMARY KEY(id),
 	FOREIGN KEY(users_id) REFERENCES users(id),
 	FOREIGN KEY(excercise_id) REFERENCES excercise(id)
 );
