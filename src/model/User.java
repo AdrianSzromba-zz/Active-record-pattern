@@ -139,6 +139,17 @@ public class User {
 		return uArray;
 	}
 	
+	public void delete(Connection conn) throws SQLException {
+		if (this.id != 0) {
+			String sql = "DELETE FROM users WHERE id= ?";
+			PreparedStatement preparedStatement;
+			preparedStatement = conn.prepareStatement(sql);
+			preparedStatement.setLong(1, this.id);
+			preparedStatement.executeUpdate();
+			this.id = 0;
+		}
+	}
+	
 	public static User getById(long id) {
 		String sql ="";
 		//execute
