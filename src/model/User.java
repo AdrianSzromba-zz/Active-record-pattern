@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -103,20 +104,39 @@ public class User {
 		}
 	}
 	
-	static public User loadUserById(Connection conn, int id) throws SQLException {
-		String sql = "SELECT * FROM Users where id=?";
+	static public User loadUserById(Connection conn, long id) throws SQLException {
+		String sql = "SELECT * FROM users where id=?;";
 		PreparedStatement preparedStatement = conn.prepareStatement(sql);
-		preparedStatement.setInt(1, id);
+		preparedStatement.setLong(1, id);
 		ResultSet resultSet = preparedStatement.executeQuery();
 		if (resultSet.next()) {
 			User loadedUser = new User();
-			loadedUser.id = resultSet.getInt("id");
+			loadedUser.id = resultSet.getLong("id");
 			loadedUser.username = resultSet.getString("username");
 			loadedUser.password = resultSet.getString("password");
 			loadedUser.email = resultSet.getString("email");
 			return loadedUser;
 		}
 		return null;
+	}
+	
+	static public User[] loadAllUsers(Connection conn) throws SQLException {
+		ArrayList<User> users = new ArrayList<User>();
+		String sql = "SELECT * FROM users;";
+		PreparedStatement preparedStatement;
+		preparedStatement = conn.prepareStatement(sql);
+		ResultSet resultSet = preparedStatement.executeQuery();
+		while (resultSet.next()) {
+			User loadedUser = new User();
+			loadedUser.id = resultSet.getLong("id");
+			loadedUser.username = resultSet.getString("username");
+			loadedUser.password = resultSet.getString("password");
+			loadedUser.email = resultSet.getString("email");
+			users.add(loadedUser);
+		}
+		User[] uArray = new User[users.size()];
+		uArray = users.toArray(uArray);
+		return uArray;
 	}
 	
 	public static User getById(long id) {
