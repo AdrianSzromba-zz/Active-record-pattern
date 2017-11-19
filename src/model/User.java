@@ -52,12 +52,12 @@ public class User {
 		return password;
 	}
 	
-	public void checkPassword(String password) {
-		BCrypt.checkpw(password, this.password);
-	}
-
 	public void setPassword(String password) {
 		this.password = BCrypt.hashpw(password, BCrypt.gensalt());
+	}
+	
+	public void checkPassword(String password) {
+		BCrypt.checkpw(password, this.password);
 	}
 
 	public int getUserGroupId() {
@@ -72,35 +72,51 @@ public class User {
 		return id;
 	}
 
-	public void save(Connection conn) throws SQLException {
+	public void saveToDB(Connection conn) throws SQLException {
 		if(this.id == 0) {
 			String sql = "INSERT INTO users(username, email, password, user_group_id)"
 					+ "VALUES(?,?,?,?);";
 			String[] generatedColumns ={"ID"};
-			PreparedStatement ps = conn.prepareStatement(sql, generatedColumns);
-			ps.setString(1, this.username);
-			ps.setString(2, this.email);
-			ps.setString(3, this.password);
-			ps.setInt(4, this.userGroupId);
-			ps.executeUpdate();
-			ResultSet gk = ps.getGeneratedKeys();
-			if (gk.next()) {
-				this.id = gk.getLong(1);
+			PreparedStatement preparedStatement = conn.prepareStatement(sql, generatedColumns);
+			preparedStatement.setString(1, this.username);
+			preparedStatement.setString(2, this.email);
+			preparedStatement.setString(3, this.password);
+			preparedStatement.setInt(4, this.userGroupId);
+			preparedStatement.executeUpdate();
+			ResultSet resultSet = preparedStatement.getGeneratedKeys();
+			if (resultSet.next()) {
+				this.id = resultSet.getLong(1);
 			}
-			gk.close();
-			ps.close();
+			resultSet.close();
+			preparedStatement.close();
 		} else {
 			String sql = "UPDATE users SET username=?, email=?, password=?, user_group_id=? "
 					+ "WHERE id=?;";
-			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, this.username);
-			ps.setString(2, this.email);
-			ps.setString(3, this.password);
-			ps.setInt(4, this.userGroupId);
-			ps.setLong(5, this.id);
-			ps.executeUpdate();
-			ps.close();
+			PreparedStatement preparedStatement = conn.prepareStatement(sql);
+			preparedStatement.setString(1, this.username);
+			preparedStatement.setString(2, this.email);
+			preparedStatement.setString(3, this.password);
+			preparedStatement.setInt(4, this.userGroupId);
+			preparedStatement.setLong(5, this.id);
+			preparedStatement.executeUpdate();
+			preparedStatement.close();
 		}
+	}
+	
+	static public User loadUserById(Connection conn, int id) throws SQLException {
+		String sql = "SELECT * FROM Users where id=?";
+		PreparedStatement preparedStatement = conn.prepareStatement(sql);
+		preparedStatement.setInt(1, id);
+		ResultSet resultSet = preparedStatement.executeQuery();
+		if (resultSet.next()) {
+			User loadedUser = new User();
+			loadedUser.id = resultSet.getInt("id");
+			loadedUser.username = resultSet.getString("username");
+			loadedUser.password = resultSet.getString("password");
+			loadedUser.email = resultSet.getString("email");
+			return loadedUser;
+		}
+		return null;
 	}
 	
 	public static User getById(long id) {
