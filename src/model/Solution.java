@@ -160,6 +160,27 @@ public class Solution {
 		}
 	}
 	
+	static public Solution[] loadAllByUserId (Connection conn, long usersId) throws SQLException {
+		ArrayList<Solution> solutions = new ArrayList<Solution>();
+		String sql = "SELECT * FROM solution WHERE users_id=?;";
+		PreparedStatement preparedStatement;
+		preparedStatement = conn.prepareStatement(sql);
+		preparedStatement.setLong(1, usersId);
+		ResultSet resultSet = preparedStatement.executeQuery();
+		while (resultSet.next()) {
+			Solution loadedSolution = new Solution();
+			loadedSolution.id = resultSet.getInt("id");
+			loadedSolution.created = resultSet.getString("created");
+			loadedSolution.updated = resultSet.getString("updated");
+			loadedSolution.excerciseId = resultSet.getInt("excercise_id");
+			loadedSolution.usersId = resultSet.getLong("users_id");
+			solutions.add(loadedSolution);
+		}
+		Solution[] uArray = new Solution[solutions.size()];
+		uArray = solutions.toArray(uArray);
+		return uArray;
+	}
+	
 	static public Solution[] loadAllByExerciseId (Connection conn, int excerciseId) throws SQLException {
 		ArrayList<Solution> solutions = new ArrayList<Solution>();
 		String sql = "SELECT * FROM solution WHERE excercise_id=? ORDER BY created ASC;";
